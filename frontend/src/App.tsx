@@ -26,7 +26,7 @@ const Protected = ({ children }: { children: React.ReactNode }) => {
       <div className="min-h-screen flex items-center justify-center bg-surface-50">
         <div className="flex flex-col items-center gap-3">
           <Spinner className="w-8 h-8" />
-          <p className="text-sm text-slate-400">Loading TankerOS...</p>
+          <p className="text-sm text-slate-400">Loading Flowgent...</p>
         </div>
       </div>
     )

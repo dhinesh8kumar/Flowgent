@@ -30,7 +30,7 @@ export const Sidebar = () => {
           <Droplets className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="font-display font-bold text-slate-900 text-sm leading-tight">TankerOS</p>
+          <p className="font-display font-bold text-slate-900 text-sm leading-tight">Flowgent</p>
           <p className="text-xs text-slate-400 truncate max-w-[120px]">{user?.tenant?.name ?? 'Dashboard'}</p>
         </div>
       </div>
