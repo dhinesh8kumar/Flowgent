@@ -10,7 +10,6 @@ import { clsx } from 'clsx'
 const navItems = [
   { to: '/',          icon: LayoutDashboard, label: 'Dashboard'  },
   { to: '/bookings',  icon: CalendarCheck,   label: 'Bookings'   },
-  { to: '/tankers',   icon: Truck,           label: 'Tankers'    },
   { to: '/customers', icon: Users,           label: 'Customers'  },
   { to: '/settings',  icon: Settings,        label: 'Settings'   },
 ]
@@ -84,7 +83,7 @@ export const Sidebar = () => {
           <div className="w-7 h-7 rounded-xl bg-brand-600 flex items-center justify-center">
             <Droplets className="w-4 h-4 text-white" />
           </div>
-          <span className="font-display font-bold text-slate-900 text-sm">TankerOS</span>
+          <span className="font-display font-bold text-slate-900 text-sm">Flowgent</span>
         </div>
         <button onClick={() => setMobileOpen(true)} className="btn-ghost p-2 rounded-xl">
           <Menu className="w-5 h-5" />

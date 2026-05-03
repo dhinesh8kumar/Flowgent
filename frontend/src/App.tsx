@@ -7,7 +7,6 @@ import { Spinner } from './components/ui'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Bookings from './pages/Bookings'
-import Tankers from './pages/Tankers'
 import Customers from './pages/Customers'
 import Settings from './pages/Settings'
 
@@ -59,13 +58,7 @@ const AppRoutes = () => {
         </Protected>
       } />
 
-      <Route path="/tankers" element={
-        <Protected>
-          <Layout>
-            <Tankers />
-          </Layout>
-        </Protected>
-      } />
+      
 
       <Route path="/customers" element={
         <Protected>

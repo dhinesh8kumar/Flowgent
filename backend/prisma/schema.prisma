@@ -20,7 +20,7 @@ model Tenant {
   updatedAt        DateTime @updatedAt
 
   users         User[]
-  tankers       Tanker[]
+  
   bookings      Booking[]
   customers     Customer[]
   conversations Conversation[]
@@ -84,33 +84,6 @@ model Customer {
   @@map("customers")
 }
 
-model Tanker {
-  id          String       @id @default(uuid())
-  tenantId    String
-  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  vehicleNo   String
-  capacityKL  Int
-  driverName  String
-  driverPhone String
-  isAvailable Boolean      @default(true)
-  status      TankerStatus @default(IDLE)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  bookings Booking[]
-
-  @@unique([tenantId, vehicleNo])
-  @@index([tenantId])
-  @@map("tankers")
-}
-
-enum TankerStatus {
-  IDLE
-  DISPATCHED
-  EN_ROUTE
-  DELIVERING
-  MAINTENANCE
-}
 
 model Booking {
   id              String        @id @default(uuid())
@@ -118,34 +91,35 @@ model Booking {
   tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   customerId      String
   customer        Customer      @relation(fields: [customerId], references: [id])
-  tankerId        String?
-  tanker          Tanker?       @relation(fields: [tankerId], references: [id])
+
   bookingRef      String        @unique
-  quantityKL      Int
+  serviceName     String                        // "AC Cleaning", "10KL Sweet Water", "Teeth Cleaning"
+  quantity        Float?                        // 10 (KL), 1 (unit), 2 (rooms) — generic
+  unit            String?                       // "KL", "unit", "rooms", "hours"
   scheduledDate   DateTime
   scheduledSlot   String?
   deliveryAddress String
   locality        String?
-  latitude        Float?
-  longitude       Float?
   notes           String?
+
   status          BookingStatus @default(PENDING)
-  pricePerKL      Float?
   totalAmount     Float?
   paidAmount      Float?
   paymentStatus   PaymentStatus @default(UNPAID)
+
   confirmedAt     DateTime?
   dispatchedAt    DateTime?
   deliveredAt     DateTime?
   cancelledAt     DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
   source          BookingSource @default(WHATSAPP)
   aiParsed        Boolean       @default(false)
+  assignedTo      String?       // staff name or ID — optional
 
   @@index([tenantId])
   @@index([customerId])
-  @@index([tankerId])
   @@index([scheduledDate])
   @@index([status])
   @@map("bookings")

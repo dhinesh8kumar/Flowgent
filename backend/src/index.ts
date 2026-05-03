@@ -9,7 +9,6 @@ import healthRouter from './routes/health';
 import authRouter from './routes/auth';
 import tenantsRouter from './routes/tenants';
 import webhookRouter from './routes/webhook';
-import tankersRouter from './routes/tankers';
 import bookingsRouter from './routes/bookings';
 import customersRouter from './routes/customers';
 import { logger } from './utils/logger';
@@ -41,7 +40,6 @@ app.use('/health', healthRouter);
 app.use('/auth', authRouter);
 app.use('/tenants', tenantsRouter);
 app.use('/webhook', webhookRouter);
-app.use('/tankers', tankersRouter);
 app.use('/bookings', bookingsRouter);
 app.use('/customers', customersRouter);
 

@@ -13,12 +13,15 @@ router.get('/stats/summary', async (req: AuthenticatedRequest, res: Response): P
   const tenantId = req.tenantId!;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const [todayBookings, pending, totalRevenue, totalCustomers] = await Promise.all([
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+  const [todayBookings, pending, totalRevenue, totalCustomers, monthRevenue] = await Promise.all([
     prisma.booking.count({ where: { tenantId, scheduledDate: { gte: today, lt: tomorrow } } }),
     prisma.booking.count({ where: { tenantId, status: 'PENDING' } }),
     prisma.booking.aggregate({ where: { tenantId, status: 'DELIVERED' }, _sum: { totalAmount: true } }),
     prisma.customer.count({ where: { tenantId } }),
+    prisma.booking.aggregate({where: { tenantId, status: 'DELIVERED', deliveredAt: { gte: monthStart } },_sum: { totalAmount: true },}),
   ]);
 
   sendSuccess(res, {
@@ -26,6 +29,7 @@ router.get('/stats/summary', async (req: AuthenticatedRequest, res: Response): P
     pendingBookings: pending,
     totalRevenue: totalRevenue._sum.totalAmount ?? 0,
     totalCustomers,
+    monthRevenue: monthRevenue._sum.totalAmount ?? 0
   });
 });
 
@@ -63,7 +67,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response): Promise<void> 
 router.get('/:id', async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const booking = await prisma.booking.findFirst({
     where: { id: req.params.id, tenantId: req.tenantId },
-    include: { customer: true, tanker: true },
+    include: { customer: true },
   });
   if (!booking) { sendError(res, 'Booking not found', 404); return; }
   sendSuccess(res, booking);
@@ -71,9 +75,10 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response): Promise<voi
 
 router.patch('/:id/status', async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const schema = z.object({
-    status: z.nativeEnum(BookingStatus),
-    tankerId: z.string().uuid().optional(),
-  });
+  status: z.nativeEnum(BookingStatus),
+  assignedTo: z.string().optional(),  
+  notes: z.string().optional(),
+})
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) { sendError(res, parsed.error.message, 400); return; }
 
@@ -89,7 +94,7 @@ router.patch('/:id/status', async (req: AuthenticatedRequest, res: Response): Pr
   const updated = await prisma.booking.update({
     where: { id: req.params.id },
     data: { status: parsed.data.status, ...timestamps, ...(parsed.data.tankerId && { tankerId: parsed.data.tankerId }) },
-    include: { customer: true, tanker: true },
+    include: { customer: true },
   });
 
   sendSuccess(res, updated, `Booking ${parsed.data.status.toLowerCase()}`);
