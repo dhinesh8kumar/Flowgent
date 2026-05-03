@@ -6,7 +6,7 @@ A full-stack SaaS platform that enables customers to book services via a WhatsAp
 ## 📦 Project Structure
 
 ```
-TankerOS/
+Flowgent/
 ├── backend/          Node.js + Express + TypeScript + Prisma
 └── dashboard/        React 18 + Vite + Tailwind CSS
 ```
