@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { tenantApi } from '../services/api'
+import api, { tenantApi } from '../services/api'
 import { Card, Button, Input } from '../components/ui'
-import { Settings as SettingsIcon, Wifi, WifiOff, Building2 } from 'lucide-react'
+import { Settings as SettingsIcon, Wifi, WifiOff, Building2 ,Lock} from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
@@ -10,6 +10,9 @@ export default function Settings() {
   const { user } = useAuth()
   const qc = useQueryClient()
   const [form, setForm] = useState({ name: '', city: '', whatsappPhoneId: '', whatsappToken: '' })
+  const [passwordForm, setPasswordForm] = useState({ current: '', next: '', confirm: '' })
+  const [changingPassword, setChangingPassword] = useState(false)
+
 
   const { data: tenantData } = useQuery({
     queryKey: ['tenant'],
@@ -32,6 +35,30 @@ export default function Settings() {
     onSuccess: () => { toast.success('Settings saved!'); qc.invalidateQueries({ queryKey: ['tenant'] }) },
     onError: () => toast.error('Failed to save settings'),
   })
+
+  const handlePasswordChange = async () => {
+  if (passwordForm.next !== passwordForm.confirm) {
+    toast.error('New passwords do not match')
+    return
+  }
+  if (passwordForm.next.length < 8) {
+    toast.error('Password must be at least 8 characters')
+    return
+  }
+  setChangingPassword(true)
+  try {
+    await api.post('/auth/change-password', {
+      currentPassword: passwordForm.current,
+      newPassword: passwordForm.next,
+    })
+    toast.success('Password updated!')
+    setPasswordForm({ current: '', next: '', confirm: '' })
+  } catch (err: any) {
+    toast.error(err?.response?.data?.error ?? 'Failed to update password')
+  } finally {
+    setChangingPassword(false)
+  }
+}
 
   const waConnected = !!tenantData?.whatsappPhoneId
 
@@ -103,6 +130,50 @@ export default function Settings() {
       <Button onClick={() => updateTenant.mutate()} loading={updateTenant.isPending} className="w-full justify-center">
         <SettingsIcon className="w-4 h-4 mr-2" /> Save Settings
       </Button>
+
+      
+<Card>
+  <div className="flex items-center gap-3 mb-5">
+    <div className="w-9 h-9 rounded-2xl bg-slate-50 flex items-center justify-center">
+      <Lock className="w-4 h-4 text-slate-600" />
     </div>
+    <h2 className="font-display font-semibold text-slate-800">Change Password</h2>
+  </div>
+
+  <div className="space-y-4">
+    <Input
+      label="Current Password"
+      type="password"
+      placeholder="Your current password"
+      value={passwordForm.current}
+      onChange={e => setPasswordForm(f => ({ ...f, current: e.target.value }))}
+    />
+    <Input
+      label="New Password"
+      type="password"
+      placeholder="Min 8 characters"
+      value={passwordForm.next}
+      onChange={e => setPasswordForm(f => ({ ...f, next: e.target.value }))}
+    />
+    <Input
+      label="Confirm New Password"
+      type="password"
+      placeholder="Repeat new password"
+      value={passwordForm.confirm}
+      onChange={e => setPasswordForm(f => ({ ...f, confirm: e.target.value }))}
+    />
+    <Button
+      onClick={handlePasswordChange}
+      loading={changingPassword}
+      variant="secondary"
+      className="w-full justify-center"
+    >
+      Update Password
+    </Button>
+  </div>
+</Card>
+    </div>
+
+    
   )
 }
