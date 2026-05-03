@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { dashboardApi, bookingsApi } from '../services/api'
 import { DashboardStats, Booking } from '../types'
 import { Card, Badge, Spinner } from '../components/ui'
-import { CalendarCheck, Truck, IndianRupee, Users, TrendingUp, Droplets } from 'lucide-react'
+import { CalendarCheck, IndianRupee, Users, TrendingUp, Droplets } from 'lucide-react'
 import { format } from 'date-fns'
 import { useAuth } from '../context/AuthContext'
 
@@ -65,34 +65,10 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="Today's Bookings"
-            value={stats?.todayBookings ?? 0}
-            icon={CalendarCheck}
-            color="bg-brand-50 text-brand-600"
-            sub="scheduled today"
-          />
-          <StatCard
-            label="Pending"
-            value={stats?.pendingBookings ?? 0}
-            icon={TrendingUp}
-            color="bg-amber-50 text-amber-600"
-            sub="need confirmation"
-          />
-          <StatCard
-            label="Revenue"
-            value={`₹${((stats?.totalRevenue ?? 0) / 1000).toFixed(1)}k`}
-            icon={IndianRupee}
-            color="bg-green-50 text-green-600"
-            sub="total delivered"
-          />
-          <StatCard
-            label="Customers"
-            value={stats?.totalCustomers ?? 0}
-            icon={Users}
-            color="bg-purple-50 text-purple-600"
-            sub="via WhatsApp"
-          />
+<StatCard label="Today's Bookings"    value={stats?.todayBookings ?? 0}    icon={CalendarCheck} color="bg-brand-50 text-brand-600" />
+<StatCard label="Pending Approval"    value={stats?.pendingBookings ?? 0}  icon={TrendingUp}         color="bg-amber-50 text-amber-600" />
+<StatCard label="Revenue This Month"  value={`₹${stats?.monthRevenue ?? 0}`} icon={IndianRupee} color="bg-green-50 text-green-600" />
+<StatCard label="Total Customers"     value={stats?.totalCustomers ?? 0}   icon={Users}         color="bg-purple-50 text-purple-600" />
         </div>
       )}
 
@@ -114,7 +90,7 @@ export default function Dashboard() {
           </div>
         ) : bookings.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Truck className="w-10 h-10 text-slate-300 mb-3" />
+            <CalendarCheck className="w-10 h-10 text-slate-300 mb-3" />
             <p className="text-slate-500 font-medium">No bookings yet</p>
             <p className="text-slate-400 text-sm">Bookings from WhatsApp will appear here</p>
           </div>

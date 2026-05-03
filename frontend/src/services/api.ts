@@ -42,17 +42,11 @@ export const bookingsApi = {
   list: (params?: Record<string, string>) =>
     api.get('/bookings', { params }),
   get: (id: string) => api.get(`/bookings/${id}`),
-  updateStatus: (id: string, status: string, tankerId?: string) =>
-    api.patch(`/bookings/${id}/status`, { status, tankerId }),
+  updateStatus: (id: string, status: string, driverName?: string, driverPhone?: string) =>
+    api.patch(`/bookings/${id}/status`, { status, driverName, driverPhone }),
 }
 
-export const tankersApi = {
-  list: () => api.get('/tankers'),
-  create: (data: Record<string, unknown>) => api.post('/tankers', data),
-  update: (id: string, data: Record<string, unknown>) =>
-    api.patch(`/tankers/${id}`, data),
-  delete: (id: string) => api.delete(`/tankers/${id}`),
-}
+
 
 export const customersApi = {
   list: () => api.get('/customers'),

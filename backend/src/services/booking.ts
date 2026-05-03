@@ -41,7 +41,7 @@ export const createBooking = async (input: CreateBookingInput) => {
       source: input.source ?? BookingSource.WHATSAPP,
       aiParsed: input.aiParsed ?? false,
     },
-    include: { customer: true, tanker: true },
+    include: { customer: true },
   });
 
   await prisma.customer.update({
