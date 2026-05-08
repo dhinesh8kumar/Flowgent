@@ -19,9 +19,19 @@ router.get('/stats/summary', async (req: AuthenticatedRequest, res: Response): P
   const [todayBookings, pending, totalRevenue, totalCustomers, monthRevenue] = await Promise.all([
     prisma.booking.count({ where: { tenantId, scheduledDate: { gte: today, lt: tomorrow } } }),
     prisma.booking.count({ where: { tenantId, status: 'PENDING' } }),
-    prisma.booking.aggregate({ where: { tenantId, status: 'DELIVERED' }, _sum: { totalAmount: true } }),
+    prisma.booking.aggregate({
+      where: { tenantId, status: { not: 'CANCELLED' } },
+      _sum: { totalAmount: true },
+    }),
     prisma.customer.count({ where: { tenantId } }),
-    prisma.booking.aggregate({where: { tenantId, status: 'DELIVERED', deliveredAt: { gte: monthStart } },_sum: { totalAmount: true },}),
+    prisma.booking.aggregate({
+      where: {
+        tenantId,
+        status: { not: 'CANCELLED' },
+        createdAt: { gte: monthStart },
+      },
+      _sum: { totalAmount: true },
+    }),
   ]);
 
   sendSuccess(res, {

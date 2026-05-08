@@ -185,29 +185,18 @@ enum Direction {
 }
 
 model Service {
-  id               String   @id @default(uuid())
-  tenantId         String
-  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  serviceName      String
-  serviceCode      String
-  capacity         String?
-  basePrice        Float
-  pricePerKL       Float?
-  unit             String   @default("INR")
-  minimumOrder     Int?
-  deliveryAreas    String[]
-  slotsAvailable   String[]
-  additionalCharges Json?
-  leadTimeHours    Int      @default(2)
-  description      String?
-  isActive         Boolean  @default(true)
-  effectiveFrom    DateTime @default(now())
-  effectiveTo      DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  serviceName String
+  serviceCode String
+  basePrice   Float
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([tenantId, serviceCode])
-  @@index([tenantId, isActive])
+  @@index([tenantId])
   @@map("services")
 }
 

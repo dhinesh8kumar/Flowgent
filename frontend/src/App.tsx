@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Bookings from './pages/Bookings'
 import Customers from './pages/Customers'
+import Services from './pages/Services'
 import Settings from './pages/Settings'
 
 const queryClient = new QueryClient({
@@ -64,6 +65,14 @@ const AppRoutes = () => {
         <Protected>
           <Layout>
             <Customers />
+          </Layout>
+        </Protected>
+      } />
+
+      <Route path="/services" element={
+        <Protected>
+          <Layout>
+            <Services />
           </Layout>
         </Protected>
       } />

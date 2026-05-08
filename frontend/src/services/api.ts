@@ -52,7 +52,21 @@ export const customersApi = {
   list: () => api.get('/customers'),
 }
 
+export const tankersApi = {
+  list: () => api.get('/tankers'),
+  create: (data: Record<string, unknown>) => api.post('/tankers', data),
+}
+
 export const tenantApi = {
   me: () => api.get('/tenants/me'),
   update: (data: Record<string, unknown>) => api.patch('/tenants/me', data),
+}
+
+export const servicesApi = {
+  list: () => api.get('/services'),
+  create: (data: Record<string, unknown>) => api.post('/services', data),
+  update: (id: string, data: Record<string, unknown>) => api.patch(`/services/${id}`, data),
+  remove: (id: string) => api.delete(`/services/${id}`),
+  getContext: () => api.get('/services/context/current'),
+  updateContext: (context: string) => api.patch('/services/context/current', { context }),
 }

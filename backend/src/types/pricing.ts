@@ -2,7 +2,6 @@
 // All types for the dynamic pricing + AI context system
 
 import { z } from 'zod'
-import { ServiceCategory } from '@prisma/client'
 
 // ── Manual pricing context (for POC / testing) ────────────────
 // Pass this when the tenant hasn't added pricing to DB yet.
