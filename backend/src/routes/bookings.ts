@@ -52,7 +52,6 @@ router.get('/', async (req: AuthenticatedRequest, res: Response): Promise<void> 
       orderBy: { createdAt: 'desc' },
       include: {
         customer: { select: { name: true, whatsappPhone: true } },
-        tanker: { select: { vehicleNo: true, driverName: true, driverPhone: true } },
       },
     }),
     prisma.booking.count({ where }),
@@ -93,7 +92,7 @@ router.patch('/:id/status', async (req: AuthenticatedRequest, res: Response): Pr
 
   const updated = await prisma.booking.update({
     where: { id: req.params.id },
-    data: { status: parsed.data.status, ...timestamps, ...(parsed.data.tankerId && { tankerId: parsed.data.tankerId }) },
+    data: { status: parsed.data.status, ...timestamps },
     include: { customer: true },
   });
 

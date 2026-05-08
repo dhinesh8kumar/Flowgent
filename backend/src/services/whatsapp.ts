@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { logger } from '../utils/logger';
+import { decrypt } from '../utils/crypto'
 
 const WA_VERSION = process.env.WHATSAPP_API_VERSION ?? 'v19.0';
 const BASE_URL = `https://graph.facebook.com/${WA_VERSION}`;
@@ -82,11 +83,15 @@ export const markMessageRead = async (
   }
 };
 
-export const getTenantWAConfig = (
-  tenant: { whatsappPhoneId?: string | null; whatsappToken?: string | null }
-): { phoneNumberId: string; accessToken: string } => {
+export const getTenantWAConfig = (tenant: {
+  whatsappPhoneId?: string | null
+  whatsappToken?: string | null
+}) => {
   return {
-    phoneNumberId: tenant.whatsappPhoneId ?? process.env.WHATSAPP_PHONE_NUMBER_ID ?? '',
-    accessToken: tenant.whatsappToken ?? process.env.WHATSAPP_ACCESS_TOKEN ?? '',
-  };
-};
+    phoneNumberId: tenant.whatsappPhoneId
+      ?? process.env.WHATSAPP_PHONE_NUMBER_ID ?? '',
+    accessToken: tenant.whatsappToken
+      ? decrypt(tenant.whatsappToken)          // ← decrypt on read
+      : process.env.WHATSAPP_ACCESS_TOKEN ?? '',
+  }
+}
