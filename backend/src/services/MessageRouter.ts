@@ -218,15 +218,15 @@ export class MessageRouter {
         : ''
 
       const confirmMsg =
-        `Booking Confirmed!\n\n` +
-        `Ref: ${created.bookingRef}\n` +
-        `Service: ${created.serviceName}\n` +
+        `✅ *Booking Confirmed!*\n\n` +
+        `📋 Ref: *${created.bookingRef}*\n` +
+        `🛠️ Service: *${created.serviceName}*\n` +
         quantityLine +
-        `Date: ${scheduledDate.toLocaleDateString('en-IN')}\n` +
-        `Time: ${booking.timeSlot ?? 'Any time'}\n` +
-        `Location: ${booking.locality ?? booking.address}\n` +
-        (booking.estimatedPrice ? `Estimated: INR ${booking.estimatedPrice}\n` : '') +
-        `\nWe will call you before dispatch. Thank you!`
+        `📅 Date: ${scheduledDate.toLocaleDateString('en-IN')}\n` +
+        `⏰ Time: ${booking.timeSlot ?? 'Any time'}\n` +
+        `📍 Location: ${booking.locality ?? booking.address}\n` +
+        (booking.estimatedPrice ? `💰 Estimated: INR ${booking.estimatedPrice}\n` : '') +
+        `\n📞 We will call you before dispatch. Thank you! 🙏`
 
       await updateConversationState(conversationId, 'IDLE', {})
       await sender.sendText(fromPhone, confirmMsg)
