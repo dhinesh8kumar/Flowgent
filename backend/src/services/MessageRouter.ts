@@ -1,17 +1,9 @@
-// src/services/MessageRouter.ts
-// Orchestrates the full message flow for ANY channel:
-//   Inbound message → fetch pricing → AI reply → possibly create booking
-//
-// Used by: WhatsApp webhook, Instagram DM handler, Telegram bot handler
-// All three call processIncomingMessage() — one function to rule them all.
-
 import { PrismaClient, Tenant } from '@prisma/client'
+import { createBooking, getOrCreateConversation, saveMessage, updateConversationState, upsertCustomer } from './booking'
 import { AIService } from './AIService'
-import { upsertCustomer, getOrCreateConversation, saveMessage, updateConversationState, createBooking } from './booking'
 import { logger } from '../utils/logger'
 import { ManualPricingContext, MessageChannel, ParsedAIReply } from '../types/pricing'
 
-// Channel-specific send functions — each channel implements this interface
 export interface ChannelSender {
   sendText(to: string, message: string): Promise<void>
   sendConfirmation?(to: string, message: string, bookingRef: string): Promise<void>
@@ -25,32 +17,6 @@ export class MessageRouter {
     this.aiService = new AIService(prisma)
   }
 
-  /**
-   * ═══════════════════════════════════════════════════════════
-   * MAIN ENTRY POINT — call this from any channel handler
-   * ═══════════════════════════════════════════════════════════
-   *
-   * WhatsApp usage (no manual pricing — uses DB):
-   *   await router.processIncomingMessage({
-   *     tenant, fromPhone: '919876543210',
-   *     messageText: 'Book 10KL tomorrow Kondapur',
-   *     messageId: 'wamid.xxx',
-   *     channel: 'whatsapp',
-   *     sender,
-   *   })
-   *
-   * POC/Testing (manual pricing override):
-   *   await router.processIncomingMessage({
-   *     tenant, fromPhone: '919876543210',
-   *     messageText: 'What is price for sweet water?',
-   *     channel: 'whatsapp',
-   *     sender,
-   *     manualPricingContext: {
-   *       services: [{ serviceName: 'Sweet Water 10KL', basePrice: 700, unit: 'INR' }],
-   *       rules: { currency: 'INR' },
-   *     },
-   *   })
-   */
   async processIncomingMessage(opts: {
     tenant: Tenant
     fromPhone: string
@@ -62,30 +28,32 @@ export class MessageRouter {
     manualPricingContext?: ManualPricingContext
   }): Promise<void> {
     const {
-      tenant, fromPhone, messageText, messageId,
-      customerName, channel, sender, manualPricingContext,
+      tenant,
+      fromPhone,
+      messageText,
+      messageId,
+      customerName,
+      channel,
+      sender,
+      manualPricingContext,
     } = opts
 
-    logger.info(`[${channel.toUpperCase()}] Incoming from ${fromPhone} → tenant ${tenant.slug}`)
+    logger.info(`[${channel.toUpperCase()}] Incoming from ${fromPhone} -> tenant ${tenant.slug}`)
 
     try {
-      // ── 1. Mark as read (best effort) ──────────────────────
       if (messageId && sender.markRead) {
-        await sender.markRead(messageId).catch(() => {/* non-fatal */})
+        await sender.markRead(messageId).catch(() => undefined)
       }
 
-      // ── 2. Upsert customer ─────────────────────────────────
       const customer = await upsertCustomer(tenant.id, fromPhone, customerName)
 
       if (customer.isBlocked) {
-        logger.warn(`Blocked customer ${fromPhone} — ignoring`)
+        logger.warn(`Blocked customer ${fromPhone} - ignoring`)
         return
       }
 
-      // ── 3. Get/create conversation (maintains FSM state) ───
       const conversation = await getOrCreateConversation(tenant.id, customer.id)
 
-      // ── 4. Save inbound message ────────────────────────────
       await saveMessage({
         conversationId: conversation.id,
         waMessageId: messageId,
@@ -93,14 +61,12 @@ export class MessageRouter {
         content: messageText,
       })
 
-      // ── 5. Build conversation history for AI ───────────────
       const recentMessages = [...conversation.messages].reverse().slice(0, 8)
-      const conversationHistory = recentMessages.map((m) => ({
-        role: (m.direction === 'INBOUND' ? 'user' : 'assistant') as 'user' | 'assistant',
-        content: m.content,
+      const conversationHistory = recentMessages.map((message) => ({
+        role: (message.direction === 'INBOUND' ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: message.content,
       }))
 
-      // ── 6. Call AI with pricing context ────────────────────
       const aiReply = await this.aiService.generateContextualReply({
         message: messageText,
         tenantId: tenant.id,
@@ -111,13 +77,15 @@ export class MessageRouter {
         manualPricingContext,
       })
 
-      // ── 7. Route based on AI intent ────────────────────────
       const outboundMessage = await this.handleAIReply({
-        tenant, customer, conversation,
-        aiReply, channel, sender, fromPhone,
+        tenant,
+        customer,
+        conversation,
+        aiReply,
+        sender,
+        fromPhone,
       })
 
-      // ── 8. Save outbound message ───────────────────────────
       if (outboundMessage) {
         await saveMessage({
           conversationId: conversation.id,
@@ -126,21 +94,17 @@ export class MessageRouter {
           isAiGenerated: true,
         })
       }
-
-    } catch (err) {
-      logger.error(`[${channel}] processIncomingMessage failed`, err)
+    } catch (error) {
+      logger.error(`[${channel}] processIncomingMessage failed`, error)
       await sender.sendText(fromPhone, 'Sorry, something went wrong. Please try again in a moment.')
     }
   }
-
-  // ── Private: Route AI reply to correct action ───────────────
 
   private async handleAIReply(opts: {
     tenant: Tenant
     customer: import('@prisma/client').Customer
     conversation: import('@prisma/client').Conversation & { messages: import('@prisma/client').Message[] }
     aiReply: ParsedAIReply
-    channel: MessageChannel
     sender: ChannelSender
     fromPhone: string
   }): Promise<string> {
@@ -150,42 +114,48 @@ export class MessageRouter {
       case 'book': {
         const booking = aiReply.bookingData
 
-        // If AI needs more info → just send response message, update FSM
         if (booking?.missingFields && booking.missingFields.length > 0) {
           await updateConversationState(
             conversation.id,
             'COLLECTING_INFO',
-            this.mergeBookingContext(conversation.context as Record<string, unknown>, booking)
+            this.mergeBookingContext(conversation.context as Record<string, unknown>, booking as Record<string, unknown>)
           )
           await sender.sendText(fromPhone, aiReply.responseMessage)
           return aiReply.responseMessage
         }
 
-        // If AI has all info but wants confirmation from customer
         if (aiReply.requiresConfirmation) {
           await updateConversationState(
             conversation.id,
             'AWAITING_CONFIRMATION',
-            this.mergeBookingContext(conversation.context as Record<string, unknown>, booking ?? {})
+            this.mergeBookingContext(
+              conversation.context as Record<string, unknown>,
+              (booking ?? {}) as Record<string, unknown>
+            )
           )
           await sender.sendText(fromPhone, aiReply.responseMessage)
           return aiReply.responseMessage
         }
 
-        // Customer confirmed → create booking
         if (conversation.state === 'AWAITING_CONFIRMATION' && booking) {
           return this.createBookingAndReply({
-            tenant, customer, conversationId: conversation.id,
+            tenant,
+            customer,
+            conversationId: conversation.id,
             booking: { ...(conversation.context as Record<string, unknown>), ...booking },
-            sender, fromPhone,
+            sender,
+            fromPhone,
           })
         }
 
-        // Direct booking (high confidence, all fields present)
         if (booking && !booking.missingFields?.length) {
           return this.createBookingAndReply({
-            tenant, customer, conversationId: conversation.id,
-            booking, sender, fromPhone,
+            tenant,
+            customer,
+            conversationId: conversation.id,
+            booking: booking as Record<string, unknown>,
+            sender,
+            fromPhone,
           })
         }
 
@@ -199,7 +169,6 @@ export class MessageRouter {
       case 'cancel':
       case 'greeting':
       default: {
-        // Reset FSM to IDLE for non-booking intents
         if (['greeting', 'pricing', 'inquiry'].includes(aiReply.intent)) {
           await updateConversationState(conversation.id, 'IDLE', {})
         }
@@ -220,41 +189,53 @@ export class MessageRouter {
     const { tenant, customer, conversationId, booking, sender, fromPhone } = opts
 
     try {
-      const scheduledDate = new Date(booking.date as string)
-      if (isNaN(scheduledDate.getTime())) throw new Error('Invalid date in booking context')
+      const scheduledDate = new Date(String(booking.date))
+      if (isNaN(scheduledDate.getTime())) {
+        throw new Error('Invalid date in booking context')
+      }
+
+      const rawQuantity = Number(booking.quantityKL ?? 0)
+      const quantityKL = Number.isFinite(rawQuantity) ? rawQuantity : 0
 
       const created = await createBooking({
         tenantId: tenant.id,
         customerId: customer.id,
-        quantityKL: Number(booking.quantityKL ?? 0),
+        serviceName: String(booking.serviceName ?? 'Service Booking'),
+        quantityKL,
+        unit: quantityKL > 0 ? 'KL' : undefined,
+        totalAmount: booking.estimatedPrice ? Number(booking.estimatedPrice) : undefined,
         scheduledDate,
-        scheduledSlot: (booking.timeSlot as string) ?? 'any',
-        deliveryAddress: (booking.address ?? booking.locality ?? 'To be confirmed') as string,
-        locality: booking.locality as string | undefined,
+        scheduledSlot: String(booking.timeSlot ?? 'any'),
+        deliveryAddress: String(booking.address ?? booking.locality ?? 'To be confirmed'),
+        locality: booking.locality ? String(booking.locality) : undefined,
         notes: booking.serviceName ? `Service: ${booking.serviceName}` : undefined,
         source: 'WHATSAPP',
         aiParsed: true,
       })
 
+      const quantityLine = created.quantity != null
+        ? `Qty: ${created.quantity}${created.unit ? ` ${created.unit}` : ''}\n`
+        : ''
+
       const confirmMsg =
-        `✅ *Booking Confirmed!*\n\n` +
-        `📋 Ref: *${created.bookingRef}*\n` +
-        `💧 ${created.quantityKL} KL\n` +
-        `📅 ${scheduledDate.toLocaleDateString('en-IN')}\n` +
-        `⏰ ${booking.timeSlot ?? 'Any time'}\n` +
-        `📍 ${booking.locality ?? booking.address}\n` +
-        (booking.estimatedPrice ? `💰 Estimated: ₹${booking.estimatedPrice}\n` : '') +
-        `\nWe will call you before dispatch. Thank you! 🙏`
+        `Booking Confirmed!\n\n` +
+        `Ref: ${created.bookingRef}\n` +
+        `Service: ${created.serviceName}\n` +
+        quantityLine +
+        `Date: ${scheduledDate.toLocaleDateString('en-IN')}\n` +
+        `Time: ${booking.timeSlot ?? 'Any time'}\n` +
+        `Location: ${booking.locality ?? booking.address}\n` +
+        (booking.estimatedPrice ? `Estimated: INR ${booking.estimatedPrice}\n` : '') +
+        `\nWe will call you before dispatch. Thank you!`
 
       await updateConversationState(conversationId, 'IDLE', {})
       await sender.sendText(fromPhone, confirmMsg)
       return confirmMsg
-
-    } catch (err) {
-      logger.error('createBookingAndReply failed', err)
-      const errMsg = 'Sorry, I could not create your booking. Please call us directly.'
-      await sender.sendText(fromPhone, errMsg)
-      return errMsg
+    } catch (error) {
+      logger.error('createBookingAndReply failed', error)
+      const errorMessage = 'Sorry, I could not create your booking. Please call us directly.'
+      await sender.sendText(fromPhone, errorMessage)
+      return errorMessage
     }
   }
 
@@ -262,11 +243,10 @@ export class MessageRouter {
     existing: Record<string, unknown>,
     incoming: Record<string, unknown>
   ): Record<string, unknown> {
-    // Only overwrite non-null incoming values
     const merged = { ...existing }
-    for (const [k, v] of Object.entries(incoming)) {
-      if (v != null && v !== '' && k !== 'missingFields') {
-        merged[k] = v
+    for (const [key, value] of Object.entries(incoming)) {
+      if (value != null && value !== '' && key !== 'missingFields') {
+        merged[key] = value
       }
     }
     return merged

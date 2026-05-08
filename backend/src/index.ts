@@ -11,6 +11,7 @@ import tenantsRouter from './routes/tenants';
 import webhookRouter from './routes/webhook';
 import bookingsRouter from './routes/bookings';
 import customersRouter from './routes/customers';
+import servicesRouter from './routes/services';
 import { logger } from './utils/logger';
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/tenants', tenantsRouter);
 app.use('/webhook', webhookRouter);
 app.use('/bookings', bookingsRouter);
 app.use('/customers', customersRouter);
+app.use('/services', servicesRouter);
 
 app.use((_req, res) => res.status(404).json({ success: false, error: 'Route not found' }));
 

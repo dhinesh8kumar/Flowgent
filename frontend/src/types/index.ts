@@ -30,9 +30,9 @@ export interface Tanker {
 
 export interface Booking {
   id: string; tenantId: string; customerId: string; tankerId?: string
-  bookingRef: string; quantityKL: number; scheduledDate: string
+  bookingRef: string; serviceName: string; quantity?: number | null; unit?: string | null; scheduledDate: string
   scheduledSlot?: string; deliveryAddress: string; locality?: string
-  notes?: string; status: BookingStatus; pricePerKL?: number
+  notes?: string; status: BookingStatus
   totalAmount?: number; paymentStatus: PaymentStatus
   confirmedAt?: string; dispatchedAt?: string; deliveredAt?: string
   cancelledAt?: string; createdAt: string
@@ -44,4 +44,24 @@ export interface Booking {
 export interface DashboardStats {
   todayBookings: number; pendingBookings: number
   totalRevenue: number; totalCustomers: number
+  monthRevenue: number
+}
+
+export interface Service {
+  id: string
+  tenantId: string
+  serviceName: string
+  serviceCode: string
+  basePrice: number
+  description?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TenantContext {
+  id?: string
+  tenantId?: string
+  context: string
+  createdAt?: string
+  updatedAt?: string
 }
