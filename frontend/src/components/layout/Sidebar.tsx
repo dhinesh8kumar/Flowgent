@@ -2,10 +2,11 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Truck, CalendarCheck, Users,
-  Settings, LogOut, Droplets, Menu, X, Package
+  Settings, LogOut, Menu, X, Package
 } from 'lucide-react'
 import { useState } from 'react'
 import { clsx } from 'clsx'
+import { BrandMark } from '../brand/BrandMark'
 
 const navItems = [
   { to: '/',          icon: LayoutDashboard, label: 'Dashboard'  },
@@ -26,11 +27,9 @@ export const Sidebar = () => {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6 border-b border-surface-100">
-        <div className="w-9 h-9 rounded-2xl bg-brand-600 flex items-center justify-center shadow-soft">
-          <Droplets className="w-5 h-5 text-white" />
-        </div>
+        <BrandMark className="h-9 w-9" iconClassName="h-4 w-4" />
         <div>
-          <p className="font-display font-bold text-slate-900 text-sm leading-tight">Flowgent</p>
+          <p className="font-display font-bold text-slate-900 text-sm leading-tight">Zevio</p>
           <p className="text-xs text-slate-400 truncate max-w-[120px]">{user?.tenant?.name ?? 'Dashboard'}</p>
         </div>
       </div>
@@ -81,10 +80,8 @@ export const Sidebar = () => {
       {/* Mobile top bar */}
       <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-surface-200 sticky top-0 z-30">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl bg-brand-600 flex items-center justify-center">
-            <Droplets className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-display font-bold text-slate-900 text-sm">Flowgent</span>
+          <BrandMark className="h-7 w-7" iconClassName="h-3.5 w-3.5" />
+          <span className="font-display font-bold text-slate-900 text-sm">Zevio</span>
         </div>
         <button onClick={() => setMobileOpen(true)} className="btn-ghost p-2 rounded-xl">
           <Menu className="w-5 h-5" />
