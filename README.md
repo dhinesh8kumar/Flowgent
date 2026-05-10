@@ -1,4 +1,4 @@
-🚀 Flowgent — Multi-Tenant Service Automation SaaS
+🚀 Zevio — Multi-Tenant Service Automation SaaS
 A full-stack SaaS platform that enables customers to book services via a WhatsApp AI chatbot, while businesses manage operations through a modern React dashboard. Built for scalable, real-time, AI-driven workflows.
 
 ---
@@ -6,7 +6,7 @@ A full-stack SaaS platform that enables customers to book services via a WhatsAp
 ## 📦 Project Structure
 
 ```
-Flowgent/
+Zevio/
 ├── backend/          Node.js + Express + TypeScript + Prisma
 └── dashboard/        React 18 + Vite + Tailwind CSS
 ```

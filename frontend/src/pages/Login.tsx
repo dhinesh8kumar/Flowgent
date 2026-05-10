@@ -1,9 +1,10 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Droplets, Mail, Lock } from 'lucide-react'
+import { Mail, Lock } from 'lucide-react'
 import { Button, Input } from '../components/ui'
 import toast from 'react-hot-toast'
+import { BrandMark } from '../components/brand/BrandMark'
 
 export default function Login() {
   const { login } = useAuth()
@@ -39,11 +40,11 @@ export default function Login() {
       <div className="relative w-full max-w-sm animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl bg-brand-600 shadow-soft mb-4">
-            <Droplets className="w-7 h-7 text-white" />
+          <div className="mb-4 inline-flex">
+            <BrandMark className="h-14 w-14" iconClassName="h-6 w-6" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-slate-900">TankerOS</h1>
-          <p className="text-slate-500 text-sm mt-1">Water Tanker Management</p>
+          <h1 className="font-display text-2xl font-bold text-slate-900">Zevio</h1>
+          <p className="text-slate-500 text-sm mt-1">AI booking operations for service businesses</p>
         </div>
 
         {/* Card */}
@@ -82,7 +83,7 @@ export default function Login() {
             )}
 
             <Button type="submit" loading={loading} className="w-full justify-center">
-              Sign in to Dashboard
+              Sign in to Zevio
             </Button>
           </form>
 

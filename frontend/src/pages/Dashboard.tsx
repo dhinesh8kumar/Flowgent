@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
-import { CalendarCheck, Droplets, IndianRupee, TrendingUp, Users } from 'lucide-react'
+import { CalendarCheck, IndianRupee, TrendingUp, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { bookingsApi, dashboardApi } from '../services/api'
 import { Booking, DashboardStats } from '../types'
 import { Badge, Card, Spinner } from '../components/ui'
+import { BrandMark } from '../components/brand/BrandMark'
 
 const StatCard = ({ label, value, icon: Icon, color, sub }: {
   label: string
@@ -52,8 +53,8 @@ export default function Dashboard() {
           <p className="mt-0.5 text-sm text-slate-500">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
         </div>
         <div className="hidden items-center gap-2 rounded-2xl border border-brand-100 bg-brand-50 px-4 py-2 sm:flex">
-          <Droplets className="h-4 w-4 text-brand-500" />
-          <span className="text-sm font-medium text-brand-700">Live</span>
+          <BrandMark className="h-6 w-6 border-brand-100 bg-white" iconClassName="h-3 w-3" />
+          <span className="text-sm font-medium text-brand-700">Zevio Live</span>
           <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
         </div>
       </div>
