@@ -112,7 +112,7 @@ export class AIService {
       const systemPrompt = this.promptBuilder.buildSystemPrompt(pricingCtx, channel)
 
       // ── Step 3: Build conversation messages ────────────────
-      const messages: Groq.Chat.ChatCompletionMessageParam[] = []
+      const messages: any[] = []
 
       // Include recent conversation for multi-turn context
       if (conversationHistory.length > 0) {

@@ -40,9 +40,10 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     for (const change of entry.changes ?? []) {
       if (change.field !== 'messages') continue
 
-      const value = change.value
-      const phoneNumberId = value.metadata?.phone_number_id
-      if (!phoneNumberId) continue
+          const value = change.value
+          if (!value) continue
+          const phoneNumberId = value.metadata?.phone_number_id
+          if (!phoneNumberId) continue
 
       const tenant = await resolveTenantFromPhoneId(phoneNumberId)
       if (!tenant) {
@@ -64,13 +65,13 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
         // ════════════════════════════════════════════════════
         // SCENARIO A — Production: DB pricing (default)
         // ════════════════════════════════════════════════════
-        messageRouter.processIncomingMessage({
-          tenant,
-          fromPhone: message.from,
-          messageText,
-          messageId: message.id,
-          customerName: contact?.profile?.name,
-          channel: 'whatsapp',
+          messageRouter.processIncomingMessage({
+            tenant,
+            fromPhone: message.from ?? '',
+            messageText,
+            messageId: message.id,
+            customerName: contact?.profile?.name,
+            channel: 'whatsapp',
           sender,
           // manualPricingContext: undefined  ← uses DB
         }).catch(err => logger.error(`Failed to process message ${message.id}`, err))

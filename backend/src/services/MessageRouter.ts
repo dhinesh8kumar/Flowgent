@@ -74,7 +74,7 @@ export class MessageRouter {
         customerName: customer.name ?? undefined,
         conversationHistory,
         pendingBookingContext: (conversation.context as Record<string, unknown>) ?? {},
-        manualPricingContext,
+        manualPricingContext: manualPricingContext as any,
       })
 
       const outboundMessage = await this.handleAIReply({
@@ -118,7 +118,7 @@ export class MessageRouter {
           await updateConversationState(
             conversation.id,
             'COLLECTING_INFO',
-            this.mergeBookingContext(conversation.context as Record<string, unknown>, booking as Record<string, unknown>)
+            this.mergeBookingContext(conversation.context as Record<string, unknown>, booking as unknown as Record<string, unknown>)
           )
           await sender.sendText(fromPhone, aiReply.responseMessage)
           return aiReply.responseMessage
@@ -130,7 +130,7 @@ export class MessageRouter {
             'AWAITING_CONFIRMATION',
             this.mergeBookingContext(
               conversation.context as Record<string, unknown>,
-              (booking ?? {}) as Record<string, unknown>
+              (booking ?? {}) as unknown as Record<string, unknown>
             )
           )
           await sender.sendText(fromPhone, aiReply.responseMessage)
@@ -142,7 +142,7 @@ export class MessageRouter {
             tenant,
             customer,
             conversationId: conversation.id,
-            booking: { ...(conversation.context as Record<string, unknown>), ...booking },
+            booking: { ...(conversation.context as Record<string, unknown>), ...booking } as unknown as Record<string, unknown>,
             sender,
             fromPhone,
           })
@@ -153,7 +153,7 @@ export class MessageRouter {
             tenant,
             customer,
             conversationId: conversation.id,
-            booking: booking as Record<string, unknown>,
+            booking: booking as unknown as Record<string, unknown>,
             sender,
             fromPhone,
           })

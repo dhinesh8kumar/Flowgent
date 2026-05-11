@@ -77,7 +77,7 @@ export const getOrCreateConversation = async (tenantId: string, customerId: stri
   return prisma.conversation.upsert({
     where: { tenantId_customerId: { tenantId, customerId } },
     update: { lastMessageAt: new Date() },
-    create: { tenantId, customerId, state: 'IDLE', context: {} },
+    create: { tenantId, customerId, state: 'IDLE', context: {} as any },
     include: { messages: { orderBy: { createdAt: 'desc' }, take: 10 } },
   })
 }
@@ -107,6 +107,6 @@ export const updateConversationState = async (
 ) => {
   return prisma.conversation.update({
     where: { id: conversationId },
-    data: { state, context, lastMessageAt: new Date() },
+    data: { state, context: context as any, lastMessageAt: new Date() },
   })
 }
