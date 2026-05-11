@@ -18,7 +18,14 @@ const app = express();
 const PORT = process.env.PORT ?? 3000;
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN ?? '*', methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://your-vercel-app.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  credentials: true
+}));
 
 app.use('/webhook', express.raw({ type: 'application/json' }), (req, _res, next) => {
   if (Buffer.isBuffer(req.body)) req.body = JSON.parse(req.body.toString());
