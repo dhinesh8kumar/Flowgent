@@ -78,11 +78,11 @@ export default router
 import TelegramRouter from 'express'
 import TelegramAxios from 'axios'
 import { MessageRouter as TgMessageRouter } from '../services/MessageRouter'
-import prisma as TgPrisma from '../utils/prisma'
+import prisma from '../utils/prisma'
 import { logger as TgLogger } from '../utils/logger'
 
 const telegramRouter = TelegramRouter.Router()
-const tgMessageRouter = new TgMessageRouter(TgPrisma)
+const tgMessageRouter = new TgMessageRouter(prisma)
 
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN ?? ''
 const TG_BASE = `https://api.telegram.org/bot${TG_TOKEN}`
@@ -100,7 +100,7 @@ telegramRouter.post('/', async (req: Request, res: Response): Promise<void> => {
 
   // Resolve tenant from Telegram bot token (one bot = one tenant)
   // You can store telegram_bot_token on Tenant model
-  const tenant = await TgPrisma.tenant.findFirst({ where: { isActive: true } })
+  const tenant = await prisma.tenant.findFirst({ where: { isActive: true } })
   if (!tenant) return
 
   const sender = {
