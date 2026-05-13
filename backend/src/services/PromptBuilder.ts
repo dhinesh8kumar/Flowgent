@@ -61,7 +61,8 @@ Always respond with a valid JSON object (NO markdown, NO explanation, ONLY JSON)
   "bookingData": {
     "serviceCode": "<code or null>",
     "serviceName": "<name or null>",
-    "quantityKL": <number or null>,
+    "quantity": <number or null>,
+    "unit": "<unit or null>",
     "date": "<YYYY-MM-DD or null>",
     "timeSlot": "morning" | "afternoon" | "evening" | "any" | null,
     "locality": "<area name or null>",
@@ -89,9 +90,10 @@ INQUIRY  → Customer asks about price, availability, services, or general quest
            Set requiresConfirmation: false.
 
 BOOK     → Customer clearly wants to book (e.g., "book 10KL tomorrow Kondapur").
-           Extract: serviceName, quantity, date, timeSlot, locality.
-           Calculate estimatedPrice using the pricing list above.
-           If ALL required fields present (quantity + date + locality): set requiresConfirmation: true, ask customer to confirm.
+           Extract: serviceName, quantity, unit, date, timeSlot, locality, address when mentioned.
+           Quantity is optional. Only extract quantity and unit if the customer clearly mentions them.
+           Calculate estimatedPrice using the pricing list above. Use the listed service price directly unless a quantity-based business rule is explicitly available.
+           If ALL required fields present (serviceName + date + locality/address): set requiresConfirmation: true, ask customer to confirm.
            If fields are MISSING: set missingFields array, ask for missing info only.
 
 CONFIRM  → Customer says "yes", "confirm", "ok proceed" after you asked for confirmation.
@@ -107,9 +109,9 @@ PRICING  → Customer asks only about price list / rates.
 - NEVER quote prices not in the list above.
 - If no matching service found, say "Please contact us directly for a custom quote."
 - Always include currency (${currency}) in price quotes.
-- Calculate total = basePrice + (pricePerKL × quantity) + applicable additionalCharges.
-- Mention minimum order if customer requests less than minimumOrder.
-- Upsell larger packages when relevant (e.g., "Our 12KL tanker saves you more per KL").
+- Use the listed service price as the default estimatedPrice.
+- Only adjust price by quantity when the service description or pricing context clearly supports it.
+- Do not assume the booking unit is KL. Use the unit only if the customer states it or it is obvious from the service.
 
 ══════════════════════════════════════════════════
  CHANNEL GUIDELINES (${channel.toUpperCase()})

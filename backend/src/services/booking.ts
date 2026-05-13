@@ -13,7 +13,7 @@ export interface CreateBookingInput {
   tenantId: string
   customerId: string
   serviceName: string
-  quantityKL: number
+  quantity?: number
   unit?: string
   totalAmount?: number
   scheduledDate: Date
@@ -27,8 +27,8 @@ export interface CreateBookingInput {
 
 export const createBooking = async (input: CreateBookingInput) => {
   const bookingRef = generateBookingRef()
-  const quantity = Number.isFinite(input.quantityKL) && input.quantityKL > 0
-    ? input.quantityKL
+  const quantity = Number.isFinite(input.quantity) && (input.quantity ?? 0) > 0
+    ? input.quantity ?? null
     : null
 
   const booking = await prisma.booking.create({
@@ -38,7 +38,7 @@ export const createBooking = async (input: CreateBookingInput) => {
       bookingRef,
       serviceName: input.serviceName,
       quantity,
-      unit: quantity ? input.unit ?? 'KL' : input.unit ?? null,
+      unit: quantity ? input.unit ?? null : input.unit ?? null,
       totalAmount: input.totalAmount ?? null,
       scheduledDate: input.scheduledDate,
       scheduledSlot: input.scheduledSlot,
@@ -77,7 +77,7 @@ export const getOrCreateConversation = async (tenantId: string, customerId: stri
   return prisma.conversation.upsert({
     where: { tenantId_customerId: { tenantId, customerId } },
     update: { lastMessageAt: new Date() },
-    create: { tenantId, customerId, state: 'IDLE', context: {} },
+    create: { tenantId, customerId, state: 'IDLE', context: {} as any },
     include: { messages: { orderBy: { createdAt: 'desc' }, take: 10 } },
   })
 }
@@ -107,6 +107,6 @@ export const updateConversationState = async (
 ) => {
   return prisma.conversation.update({
     where: { id: conversationId },
-    data: { state, context, lastMessageAt: new Date() },
+    data: { state, context: context as any, lastMessageAt: new Date() },
   })
 }
