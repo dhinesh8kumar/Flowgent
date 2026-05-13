@@ -13,7 +13,7 @@ export interface CreateBookingInput {
   tenantId: string
   customerId: string
   serviceName: string
-  quantityKL: number
+  quantity?: number
   unit?: string
   totalAmount?: number
   scheduledDate: Date
@@ -27,8 +27,8 @@ export interface CreateBookingInput {
 
 export const createBooking = async (input: CreateBookingInput) => {
   const bookingRef = generateBookingRef()
-  const quantity = Number.isFinite(input.quantityKL) && input.quantityKL > 0
-    ? input.quantityKL
+  const quantity = Number.isFinite(input.quantity) && (input.quantity ?? 0) > 0
+    ? input.quantity ?? null
     : null
 
   const booking = await prisma.booking.create({
@@ -38,7 +38,7 @@ export const createBooking = async (input: CreateBookingInput) => {
       bookingRef,
       serviceName: input.serviceName,
       quantity,
-      unit: quantity ? input.unit ?? 'KL' : input.unit ?? null,
+      unit: quantity ? input.unit ?? null : input.unit ?? null,
       totalAmount: input.totalAmount ?? null,
       scheduledDate: input.scheduledDate,
       scheduledSlot: input.scheduledSlot,

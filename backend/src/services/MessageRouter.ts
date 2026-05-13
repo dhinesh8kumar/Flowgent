@@ -194,15 +194,16 @@ export class MessageRouter {
         throw new Error('Invalid date in booking context')
       }
 
-      const rawQuantity = Number(booking.quantityKL ?? 0)
-      const quantityKL = Number.isFinite(rawQuantity) ? rawQuantity : 0
+      const rawQuantity = Number(booking.quantity ?? 0)
+      const quantity = Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : undefined
+      const unit = booking.unit ? String(booking.unit) : undefined
 
       const created = await createBooking({
         tenantId: tenant.id,
         customerId: customer.id,
         serviceName: String(booking.serviceName ?? 'Service Booking'),
-        quantityKL,
-        unit: quantityKL > 0 ? 'KL' : undefined,
+        quantity,
+        unit,
         totalAmount: booking.estimatedPrice ? Number(booking.estimatedPrice) : undefined,
         scheduledDate,
         scheduledSlot: String(booking.timeSlot ?? 'any'),

@@ -99,7 +99,8 @@ export type MessageChannel = 'whatsapp' | 'instagram' | 'telegram' | 'dashboard'
 export interface BookingData {
   serviceCode?: string
   serviceName?: string
-  quantityKL?: number
+  quantity?: number
+  unit?: string
   date?: string               // ISO date YYYY-MM-DD
   timeSlot?: string
   locality?: string
