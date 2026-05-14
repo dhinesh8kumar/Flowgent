@@ -17,6 +17,7 @@ import { logger } from './utils/logger';
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 console.log('env', process.env.WHATSAPP_VERIFY_TOKEN);
+app.set('trust proxy', 1)
 app.use(helmet());
 app.use(cors({
   origin: [
