@@ -21,7 +21,7 @@ app.use(helmet());
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://zevio-zeta.vercel.app/'
+    'https://dashboard-zevio.co.in'
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true
