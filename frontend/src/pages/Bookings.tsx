@@ -52,88 +52,142 @@ export default function Bookings() {
   const bookings: Booking[] = data?.bookings ?? []
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 sm:space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-display text-2xl font-bold text-slate-900">Bookings</h1>
-        <div className="flex items-center gap-2 rounded-2xl bg-surface-100 px-3 py-2 text-sm text-slate-500">
+        <div className="flex w-fit items-center gap-2 rounded-2xl bg-surface-100 px-3 py-2 text-sm text-slate-500">
           <Filter className="h-4 w-4" />
           <span>{data?.pagination?.total ?? 0} total</span>
         </div>
       </div>
 
-      <Card className="flex flex-wrap gap-3 p-4">
-        <div className="w-40">
+      <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap">
+        <div className="w-full sm:w-40">
           <Select options={STATUS_OPTIONS} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} />
         </div>
         <input
           type="date"
           value={dateFilter}
           onChange={(event) => setDateFilter(event.target.value)}
-          className="input w-44"
+          className="input w-full sm:w-44"
         />
         {(statusFilter || dateFilter) && (
-          <Button variant="ghost" onClick={() => { setStatusFilter(''); setDateFilter('') }}>
+          <Button variant="ghost" onClick={() => { setStatusFilter(''); setDateFilter('') }} className="justify-center sm:justify-start">
             Clear filters
           </Button>
         )}
       </Card>
 
-      <Card className="p-0 overflow-hidden">
+      <Card className="overflow-hidden p-0">
         {isLoading ? (
           <div className="flex justify-center py-16"><Spinner className="w-6 h-6" /></div>
         ) : bookings.length === 0 ? (
           <EmptyState icon={<CalendarCheck className="w-6 h-6" />} title="No bookings found" description="Try changing your filters" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-surface-100">
-                  {['Ref', 'Customer / Service', 'Amount', 'Date / Slot', 'Address', 'Source', 'Status', ''].map((heading) => (
-                    <th key={heading} className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">{heading}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-50">
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-surface-50 transition-colors">
-                    <td className="px-5 py-4">
-                      <span className="whitespace-nowrap rounded-lg bg-surface-100 px-2 py-1 font-mono text-xs text-slate-600">{booking.bookingRef}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-medium text-slate-800">{booking.customer?.name ?? 'Unknown'}</p>
-                      <p className="text-xs text-slate-400">{booking.customer?.whatsappPhone}</p>
+          <>
+            <div className="grid gap-3 p-4 md:hidden">
+              {bookings.map((booking) => (
+                <Card key={booking.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="inline-flex rounded-lg bg-surface-100 px-2 py-1 font-mono text-xs text-slate-600">
+                        {booking.bookingRef}
+                      </span>
+                      <p className="mt-3 text-sm font-medium text-slate-800">{booking.customer?.name ?? 'Unknown'}</p>
+                      <p className="text-xs text-slate-400 break-all">{booking.customer?.whatsappPhone}</p>
                       <p className="mt-1 text-xs text-brand-600">{booking.serviceName}</p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="whitespace-nowrap text-sm font-semibold text-slate-800">
-                        {booking.totalAmount != null ? `INR ${booking.totalAmount}` : '—'}
-                      </p>
-                      <p className="whitespace-nowrap text-xs text-slate-400">
+                    </div>
+                    <Badge status={booking.status} />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-slate-400">Amount</p>
+                      <p className="font-semibold text-slate-800">{booking.totalAmount != null ? `INR ${booking.totalAmount}` : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">Source</p>
+                      <Badge status={booking.source} label={booking.source === 'WHATSAPP' ? 'WhatsApp' : booking.source} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">Date</p>
+                      <p className="text-slate-700">{format(new Date(booking.scheduledDate), 'd MMM yyyy')}</p>
+                      {booking.scheduledSlot && <p className="text-xs capitalize text-slate-400">{booking.scheduledSlot}</p>}
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">Quantity</p>
+                      <p className="text-slate-700">
                         {booking.quantity != null ? `${booking.quantity}${booking.unit ? ` ${booking.unit}` : ''}` : 'Service booking'}
                       </p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="text-sm text-slate-700">{format(new Date(booking.scheduledDate), 'd MMM yyyy')}</p>
-                      {booking.scheduledSlot && <p className="text-xs capitalize text-slate-400">{booking.scheduledSlot}</p>}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-slate-600">
-                      <p>{booking.locality ?? '—'}</p>
-                      <p className="mt-1 max-w-[260px] truncate text-xs text-slate-400">{booking.deliveryAddress ?? '—'}</p>
-                    </td>
-                    <td className="px-5 py-4"><Badge status={booking.source} label={booking.source === 'WHATSAPP' ? 'WhatsApp' : booking.source} /></td>
-                    <td className="px-5 py-4"><Badge status={booking.status} /></td>
-                    <td className="px-5 py-4">
-                      {NEXT_STATUSES[booking.status] && (
-                        <Button variant="ghost" size="sm" onClick={() => setSelected(booking)}>
-                          Update
-                        </Button>
-                      )}
-                    </td>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <p className="text-xs text-slate-400">Address</p>
+                    <p className="text-sm text-slate-700">{booking.locality ?? '-'}</p>
+                    <p className="mt-1 break-words text-xs text-slate-400">{booking.deliveryAddress ?? '-'}</p>
+                  </div>
+
+                  {NEXT_STATUSES[booking.status] && (
+                    <Button variant="ghost" size="sm" onClick={() => setSelected(booking)} className="mt-4 w-full justify-center">
+                      Update booking
+                    </Button>
+                  )}
+                </Card>
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-surface-100">
+                    {['Ref', 'Customer / Service', 'Amount', 'Date / Slot', 'Address', 'Source', 'Status', ''].map((heading) => (
+                      <th key={heading} className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">{heading}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-surface-50">
+                  {bookings.map((booking) => (
+                    <tr key={booking.id} className="hover:bg-surface-50 transition-colors">
+                      <td className="px-5 py-4">
+                        <span className="whitespace-nowrap rounded-lg bg-surface-100 px-2 py-1 font-mono text-xs text-slate-600">{booking.bookingRef}</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="text-sm font-medium text-slate-800">{booking.customer?.name ?? 'Unknown'}</p>
+                        <p className="text-xs text-slate-400">{booking.customer?.whatsappPhone}</p>
+                        <p className="mt-1 text-xs text-brand-600">{booking.serviceName}</p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="whitespace-nowrap text-sm font-semibold text-slate-800">
+                          {booking.totalAmount != null ? `INR ${booking.totalAmount}` : '-'}
+                        </p>
+                        <p className="whitespace-nowrap text-xs text-slate-400">
+                          {booking.quantity != null ? `${booking.quantity}${booking.unit ? ` ${booking.unit}` : ''}` : 'Service booking'}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="text-sm text-slate-700">{format(new Date(booking.scheduledDate), 'd MMM yyyy')}</p>
+                        {booking.scheduledSlot && <p className="text-xs capitalize text-slate-400">{booking.scheduledSlot}</p>}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-slate-600">
+                        <p>{booking.locality ?? '-'}</p>
+                        <p className="mt-1 max-w-[260px] truncate text-xs text-slate-400">{booking.deliveryAddress ?? '-'}</p>
+                      </td>
+                      <td className="px-5 py-4"><Badge status={booking.source} label={booking.source === 'WHATSAPP' ? 'WhatsApp' : booking.source} /></td>
+                      <td className="px-5 py-4"><Badge status={booking.status} /></td>
+                      <td className="px-5 py-4">
+                        {NEXT_STATUSES[booking.status] && (
+                          <Button variant="ghost" size="sm" onClick={() => setSelected(booking)}>
+                            Update
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </Card>
 
@@ -151,7 +205,7 @@ export default function Bookings() {
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-500">Amount</span>
-                <span className="text-right font-medium">{selected.totalAmount != null ? `INR ${selected.totalAmount}` : '—'}</span>
+                <span className="text-right font-medium">{selected.totalAmount != null ? `INR ${selected.totalAmount}` : '-'}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-500">Quantity</span>
@@ -165,11 +219,11 @@ export default function Bookings() {
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-500">Area</span>
-                <span className="text-right font-medium">{selected.locality ?? '—'}</span>
+                <span className="text-right font-medium">{selected.locality ?? '-'}</span>
               </div>
               <div className="space-y-1">
                 <span className="text-slate-500">Address</span>
-                <p className="break-words font-medium text-slate-800">{selected.deliveryAddress ?? '—'}</p>
+                <p className="break-words font-medium text-slate-800">{selected.deliveryAddress ?? '-'}</p>
               </div>
             </div>
 
