@@ -19,14 +19,14 @@ router.get('/', (req: Request, res: Response): void => {
   const mode      = req.query['hub.mode']
   const token     = req.query['hub.verify_token']
   const challenge = req.query['hub.challenge']
-  logger.info('token',{token})
-  logger.info('env', process.env.WHATSAPP_VERIFY_TOKEN)
+  console.log('TOKEN:', token)
+console.log('ENV:', process.env.WHATSAPP_VERIFY_TOKEN)
   if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
     logger.info('WhatsApp webhook verified')
     res.status(200).send(challenge)
     return
   }
-  res.status(403).json({ error: 'Verification failed' })
+  res.status(403).json({data:req.query,env: process.env.WHATSAPP_VERIFY_TOKEN, error: 'Verification failed' })
 })
 
 // ── POST /webhook — Inbound messages ─────────────────────────
