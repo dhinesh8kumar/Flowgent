@@ -9,21 +9,25 @@ import { servicesApi } from '../services/api'
 type ServiceFormState = {
   serviceName: string
   basePrice: string
+  description: string
 }
 
 const DEFAULT_FORM: ServiceFormState = {
   serviceName: '',
   basePrice: '',
+  description: '',
 }
 
 const toFormState = (service: Service): ServiceFormState => ({
   serviceName: service.serviceName,
   basePrice: String(service.basePrice),
+  description: service.description ?? '',
 })
 
 const toPayload = (form: ServiceFormState) => ({
   serviceName: form.serviceName.trim(),
   basePrice: Number(form.basePrice),
+  description: form.description.trim() || null,
 })
 
 export default function Services() {
@@ -156,6 +160,15 @@ export default function Services() {
               onChange={(event) => setForm((current) => ({ ...current, basePrice: event.target.value }))}
               placeholder="200"
             />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-slate-700">Description</label>
+              <textarea
+                className="input min-h-[120px]"
+                value={form.description}
+                onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                placeholder="Optional details the AI can use while quoting this service."
+              />
+            </div>
           </div>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -188,9 +201,12 @@ export default function Services() {
               <div className="divide-y divide-surface-100">
                 {services.map((service) => (
                   <div key={service.id} className="flex items-center justify-between gap-4 px-6 py-5">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h3 className="truncate font-medium text-slate-900">{service.serviceName}</h3>
                       <p className="mt-1 text-xs text-slate-400">{service.serviceCode}</p>
+                      {service.description ? (
+                        <p className="mt-2 max-w-2xl text-sm text-slate-500">{service.description}</p>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-3">
                       <p className="font-display text-xl font-bold text-slate-900">INR {service.basePrice}</p>

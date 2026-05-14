@@ -5,7 +5,6 @@ import prisma from '../utils/prisma';
 import { sendSuccess, sendError } from '../utils/response';
 import { authenticate, requireAdmin } from '../middleware/tenant';
 import { AuthenticatedRequest } from '../types';
-import { encrypt } from '../utils/crypto' 
 
 const router = Router();
 
@@ -27,23 +26,14 @@ router.patch('/me', authenticate, requireAdmin, async (req: AuthenticatedRequest
   const schema = z.object({
     name:            z.string().min(2).optional(),
     city:            z.string().optional(),
-    whatsappPhoneId: z.string().optional(),
-    whatsappToken:   z.string().optional(),
   })
  
   const parsed = schema.safeParse(req.body)
   if (!parsed.success) { sendError(res, parsed.error.message, 400); return }
  
-  const dataToSave = { ...parsed.data }
- 
-  if (dataToSave.whatsappToken) {
-    const { encrypt } = await import('../utils/crypto')
-    dataToSave.whatsappToken = encrypt(dataToSave.whatsappToken)
-  }
- 
   const updated = await prisma.tenant.update({
     where: { id: req.tenantId },
-    data: dataToSave,
+    data: parsed.data,
   })
  
   sendSuccess(res, updated, 'Settings saved')
