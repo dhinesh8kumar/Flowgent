@@ -121,13 +121,13 @@ export default function Services() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="space-y-5 sm:space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between lg:items-center">
         <div>
           <h1 className="font-display text-2xl font-bold text-slate-900">Services</h1>
           <p className="mt-1 text-sm text-slate-500">Keep service setup simple. Add a name and a price, and the AI will quote from this list.</p>
         </div>
-        <Button onClick={handleReset}>
+        <Button onClick={handleReset} className="justify-center sm:w-auto">
           <Plus className="mr-1.5 h-4 w-4" /> New service
         </Button>
       </div>
@@ -200,7 +200,7 @@ export default function Services() {
             ) : (
               <div className="divide-y divide-surface-100">
                 {services.map((service) => (
-                  <div key={service.id} className="flex items-center justify-between gap-4 px-6 py-5">
+                  <div key={service.id} className="flex flex-col gap-4 px-4 py-5 sm:px-6 md:flex-row md:items-center md:justify-between">
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate font-medium text-slate-900">{service.serviceName}</h3>
                       <p className="mt-1 text-xs text-slate-400">{service.serviceCode}</p>
@@ -208,12 +208,12 @@ export default function Services() {
                         <p className="mt-2 max-w-2xl text-sm text-slate-500">{service.description}</p>
                       ) : null}
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                       <p className="font-display text-xl font-bold text-slate-900">INR {service.basePrice}</p>
-                      <Button variant="ghost" onClick={() => handleEdit(service)}>
+                      <Button variant="ghost" onClick={() => handleEdit(service)} className="justify-center sm:justify-start">
                         <Pencil className="mr-1.5 h-4 w-4" /> Edit
                       </Button>
-                      <Button variant="ghost" onClick={() => deleteService.mutate(service.id)} loading={deleteService.isPending}>
+                      <Button variant="ghost" onClick={() => deleteService.mutate(service.id)} loading={deleteService.isPending} className="justify-center sm:justify-start">
                         <Trash2 className="mr-1.5 h-4 w-4" /> Delete
                       </Button>
                     </div>

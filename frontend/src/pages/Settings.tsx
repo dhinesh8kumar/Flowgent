@@ -64,7 +64,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6 animate-fade-in">
+    <div className="max-w-2xl space-y-5 sm:space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <h1 className="font-display text-2xl font-bold text-slate-900">Settings</h1>
       </div>
@@ -92,19 +92,19 @@ export default function Settings() {
           />
 
           <div className="space-y-2 rounded-2xl bg-surface-50 p-4 text-sm">
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-slate-500">Plan</span>
               <span className="font-medium text-brand-600">{tenantData?.plan ?? '-'}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-slate-500">Admin</span>
-              <span className="font-medium">{user?.email}</span>
+              <span className="font-medium break-all sm:text-right">{user?.email}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-slate-500">Customers</span>
               <span className="font-medium">{tenantData?._count?.customers ?? 0}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-slate-500">Total Bookings</span>
               <span className="font-medium">{tenantData?._count?.bookings ?? 0}</span>
             </div>
