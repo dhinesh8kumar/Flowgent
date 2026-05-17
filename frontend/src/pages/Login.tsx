@@ -9,8 +9,8 @@ import { BrandMark } from '../components/brand/BrandMark'
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('admin@sribalaji.com')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -87,9 +87,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-xs text-slate-400 mt-6">
-            Demo: admin@sribalaji.com / admin123
-          </p>
+          
         </div>
       </div>
     </div>
