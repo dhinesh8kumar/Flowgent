@@ -3,6 +3,7 @@ import { createBooking, getOrCreateConversation, saveMessage, updateConversation
 import { AIService } from './AIService'
 import { logger } from '../utils/logger'
 import { ManualPricingContext, MessageChannel, ParsedAIReply } from '../types/pricing'
+import { TenantNotificationService } from './TenantNotificationService'
 
 export interface ChannelSender {
   sendText(to: string, message: string): Promise<void>
@@ -12,9 +13,11 @@ export interface ChannelSender {
 
 export class MessageRouter {
   private readonly aiService: AIService
+  private readonly tenantNotificationService: TenantNotificationService
 
   constructor(private readonly prisma: PrismaClient) {
     this.aiService = new AIService(prisma)
+    this.tenantNotificationService = new TenantNotificationService()
   }
 
   async processIncomingMessage(opts: {
@@ -212,6 +215,14 @@ export class MessageRouter {
         notes: booking.serviceName ? `Service: ${booking.serviceName}` : undefined,
         source: 'WHATSAPP',
         aiParsed: true,
+      })
+
+      await this.tenantNotificationService.sendBookingAlert({
+        tenant,
+        booking: created,
+        customer,
+      }).catch((notificationError) => {
+        logger.error(`Failed to send tenant alert for booking ${created.bookingRef}`, notificationError)
       })
 
       const quantityLine = created.quantity != null

@@ -13,6 +13,8 @@ model Tenant {
   slug             String   @unique
   whatsappPhoneId  String?  @unique
   whatsappToken    String?
+  notificationWhatsappNumber String?
+  bookingAlertsEnabled Boolean @default(true)
   city             String   @default("Hyderabad")
   isActive         Boolean  @default(true)
   plan             Plan     @default(STARTER)

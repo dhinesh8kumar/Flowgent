@@ -26,6 +26,8 @@ router.patch('/me', authenticate, requireAdmin, async (req: AuthenticatedRequest
   const schema = z.object({
     name:            z.string().min(2).optional(),
     city:            z.string().optional(),
+    notificationWhatsappNumber: z.string().trim().min(8).max(20).optional().nullable(),
+    bookingAlertsEnabled: z.boolean().optional(),
   })
  
   const parsed = schema.safeParse(req.body)
@@ -33,7 +35,17 @@ router.patch('/me', authenticate, requireAdmin, async (req: AuthenticatedRequest
  
   const updated = await prisma.tenant.update({
     where: { id: req.tenantId },
-    data: parsed.data,
+    data: {
+      ...parsed.data,
+      ...(parsed.data.notificationWhatsappNumber !== undefined
+        ? {
+            notificationWhatsappNumber:
+              parsed.data.notificationWhatsappNumber === ''
+                ? null
+                : parsed.data.notificationWhatsappNumber,
+          }
+        : {}),
+    },
   })
  
   sendSuccess(res, updated, 'Settings saved')
