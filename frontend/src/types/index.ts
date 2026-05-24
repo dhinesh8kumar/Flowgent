@@ -5,7 +5,10 @@ export type PaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID'
 export interface Tenant {
   id: string; name: string; slug: string; city: string
   plan: 'STARTER' | 'GROWTH' | 'ENTERPRISE'; isActive: boolean
-  whatsappPhoneId?: string; createdAt: string
+  whatsappPhoneId?: string
+  notificationWhatsappNumber?: string | null
+  bookingAlertsEnabled?: boolean
+  createdAt: string
   _count?: { users: number; tankers: number; bookings: number; customers: number }
 }
 

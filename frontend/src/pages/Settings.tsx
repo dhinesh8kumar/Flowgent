@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Building2, Lock, Settings as SettingsIcon } from 'lucide-react'
+import { Bell, Building2, Lock, Settings as SettingsIcon } from 'lucide-react'
 import api, { tenantApi } from '../services/api'
 import { Button, Card, Input } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
@@ -9,7 +9,12 @@ import { useAuth } from '../context/AuthContext'
 export default function Settings() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const [form, setForm] = useState({ name: '', city: '' })
+  const [form, setForm] = useState({
+    name: '',
+    city: '',
+    notificationWhatsappNumber: '',
+    bookingAlertsEnabled: true,
+  })
   const [passwordForm, setPasswordForm] = useState({ current: '', next: '', confirm: '' })
   const [changingPassword, setChangingPassword] = useState(false)
 
@@ -23,12 +28,20 @@ export default function Settings() {
       setForm({
         name: tenantData.name ?? '',
         city: tenantData.city ?? '',
+        notificationWhatsappNumber: tenantData.notificationWhatsappNumber ?? '',
+        bookingAlertsEnabled: tenantData.bookingAlertsEnabled ?? true,
       })
     }
   }, [tenantData])
 
   const updateTenant = useMutation({
-    mutationFn: () => tenantApi.update({ name: form.name, city: form.city }),
+    mutationFn: () =>
+      tenantApi.update({
+        name: form.name,
+        city: form.city,
+        notificationWhatsappNumber: form.notificationWhatsappNumber.trim() || null,
+        bookingAlertsEnabled: form.bookingAlertsEnabled,
+      }),
     onSuccess: () => {
       toast.success('Settings saved!')
       qc.invalidateQueries({ queryKey: ['tenant'] })
@@ -90,6 +103,43 @@ export default function Settings() {
             onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
             placeholder="Hyderabad"
           />
+
+          <div className="rounded-2xl border border-surface-200 bg-surface-50 p-4">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-50">
+                <Bell className="h-4 w-4 text-brand-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-slate-800">Booking Alert WhatsApp</h3>
+                <p className="text-xs text-slate-500">New bookings will be sent to this number with a dashboard link.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Input
+                label="Recipient Number"
+                value={form.notificationWhatsappNumber}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, notificationWhatsappNumber: event.target.value }))
+                }
+                placeholder="9198xxxxxx"
+              />
+
+              <label className="flex items-start gap-3 rounded-2xl border border-surface-200 bg-white p-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-300"
+                  checked={form.bookingAlertsEnabled}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, bookingAlertsEnabled: event.target.checked }))
+                  }
+                />
+                <span>
+                  Enable booking alerts on WhatsApp
+                </span>
+              </label>
+            </div>
+          </div>
 
           <div className="space-y-2 rounded-2xl bg-surface-50 p-4 text-sm">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">

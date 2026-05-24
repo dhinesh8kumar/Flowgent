@@ -17,6 +17,15 @@ interface SendButtonsOptions extends SendTextOptions {
   bodyText: string;
 }
 
+interface SendTemplateOptions {
+  phoneNumberId: string;
+  accessToken: string;
+  to: string;
+  templateName: string;
+  languageCode?: string;
+  parameters: string[];
+}
+
 export const sendTextMessage = async (opts: SendTextOptions): Promise<string | null> => {
   const { phoneNumberId, accessToken, to, message } = opts;
   try {
@@ -63,6 +72,48 @@ export const sendButtonMessage = async (opts: SendButtonsOptions): Promise<strin
   } catch (err: unknown) {
     const error = err as { response?: { data?: unknown }; message?: string };
     logger.error('sendButtonMessage failed', error?.response?.data ?? error?.message);
+    return null;
+  }
+};
+
+export const sendTemplateMessage = async (opts: SendTemplateOptions): Promise<string | null> => {
+  const {
+    phoneNumberId,
+    accessToken,
+    to,
+    templateName,
+    languageCode = 'en',
+    parameters,
+  } = opts;
+
+  try {
+    const res = await axios.post(
+      `${BASE_URL}/${phoneNumberId}/messages`,
+      {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: languageCode },
+          components: [
+            {
+              type: 'body',
+              parameters: parameters.map((text) => ({
+                type: 'text',
+                text,
+              })),
+            },
+          ],
+        },
+      },
+      { headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' } }
+    );
+    return res.data?.messages?.[0]?.id ?? null;
+  } catch (err: unknown) {
+    const error = err as { response?: { data?: unknown }; message?: string };
+    logger.error('sendTemplateMessage failed', error?.response?.data ?? error?.message);
     return null;
   }
 };
