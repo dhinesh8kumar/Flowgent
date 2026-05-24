@@ -59,8 +59,7 @@ export class TenantNotificationService {
         amount,
         booking.scheduledDate.toLocaleDateString('en-IN'),
         booking.scheduledSlot || 'Any time',
-        address,
-        dashboardUrl,
+        address
       ],
     })
 
