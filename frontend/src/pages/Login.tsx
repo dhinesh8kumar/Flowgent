@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Mail, Lock } from 'lucide-react'
-import { Button, Input } from '../components/ui'
+import { Button } from '../components/ui'
 import toast from 'react-hot-toast'
 import { BrandMark } from '../components/brand/BrandMark'
 
@@ -87,7 +87,19 @@ export default function Login() {
             </Button>
           </form>
 
-          
+          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-500 leading-5">
+              By signing in, you agree to our{' '}
+              <Link to="/privacypolicy" className="font-medium text-brand-600 hover:text-brand-700">
+                Privacy Policy
+              </Link>{' '}
+              and{' '}
+              <Link to="/terms" className="font-medium text-brand-600 hover:text-brand-700">
+                Terms of Service
+              </Link>
+              .
+            </p>
+          </div>
         </div>
       </div>
     </div>
