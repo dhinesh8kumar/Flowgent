@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { Layout } from './components/layout/Layout'
 import { Spinner } from './components/ui'
 import Login from './pages/Login'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import Terms from './pages/Terms'
 import Dashboard from './pages/Dashboard'
 import Bookings from './pages/Bookings'
 import Customers from './pages/Customers'
@@ -42,6 +44,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={token ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<Terms />} />
 
       <Route path="/" element={
         <Protected>
