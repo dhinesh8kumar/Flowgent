@@ -253,29 +253,3 @@ POST /tenants
 
 ---
 
-
-
-## 🔧 Common Issues
-
-| Error | Fix |
-|---|---|
-| `P1001: Can't reach database server` | PostgreSQL not running. Start it or check DATABASE_URL |
-| `Authentication Error (code 190)` | WhatsApp token expired. Regenerate in Meta Developer Console |
-| `Webhook verification failed` | WHATSAPP_VERIFY_TOKEN in .env doesn't match Meta dashboard |
-| `Cannot find module 'src/index.ts'` | Run `npm run dev` from inside the `backend/` folder |
-| `Module has no exported member` | Run `npm run db:generate` after schema changes |
-| `&&` not working in PowerShell | Use `;` instead: `npm run db:push; npm run db:seed` |
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Admin approval flow for booking requests
-- [ ] Instagram DM integration
-- [ ] Telegram bot integration  
-- [ ] Interactive WhatsApp buttons (service menu, time slots)
-- [ ] Driver mobile app (PWA)
-- [ ] Razorpay payment integration
-- [ ] Auto-assign tanker based on locality + availability
-- [ ] SMS fallback for non-WhatsApp customers
-- [ ] Analytics dashboard with revenue charts
